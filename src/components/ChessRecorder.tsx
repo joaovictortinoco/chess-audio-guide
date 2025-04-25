@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { ChessBoard } from "./ChessBoard";
+import ChessBoard from "./ChessBoard";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { ChessMatch } from "@/types/chess";
