@@ -15,10 +15,6 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ position, boardWidth = 400 }) =
     boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
   };
 
-  const customSquareStyles = {
-    background: "rgb(96, 96, 96)",
-  };
-
   return (
     <div className="chess-board-container">
       <Chessboard

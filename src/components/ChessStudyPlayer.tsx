@@ -1,6 +1,4 @@
-
 import React, { useEffect, useState, useCallback } from "react";
-import { Chess } from "chess.js";
 import ChessBoard from "./ChessBoard";
 import AudioControls from "./AudioControls";
 import StudyDetails from "./StudyDetails";
@@ -24,12 +22,10 @@ const ChessStudyPlayer: React.FC = () => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
-  // Get current move
   const currentMove = audioState.currentMoveIndex >= 0 
     ? currentStudy.moves[audioState.currentMoveIndex] 
     : null;
 
-  // Load study when selected study changes
   useEffect(() => {
     const study = sampleStudies.find((s) => s.id === selectedStudyId);
     if (study) {
@@ -43,32 +39,26 @@ const ChessStudyPlayer: React.FC = () => {
     }
   }, [selectedStudyId]);
 
-  // Handle study change
   const handleStudyChange = (studyId: string) => {
     speechService.stop();
     setSelectedStudyId(studyId);
   };
 
-  // Handle next move
   const goToNextMove = useCallback(() => {
     if (audioState.currentMoveIndex < currentStudy.moves.length - 1) {
       const nextIndex = audioState.currentMoveIndex + 1;
       const nextMove = currentStudy.moves[nextIndex];
       
-      // Make the move on the board
       chessService.makeMove(nextMove.move);
       setPosition(chessService.getFen());
       
-      // Update audio state
       setAudioState(prev => ({
         ...prev,
         currentMoveIndex: nextIndex,
       }));
       
-      // Speak the commentary
       speechService.speak(`${nextMove.notation}. ${nextMove.commentary}`);
     } else {
-      // End of study
       speechService.speak("End of study.");
       setAudioState(prev => ({
         ...prev,
@@ -77,14 +67,12 @@ const ChessStudyPlayer: React.FC = () => {
     }
   }, [audioState.currentMoveIndex, currentStudy.moves]);
 
-  // Handle previous move
   const goToPreviousMove = useCallback(() => {
     speechService.stop();
     
     if (audioState.currentMoveIndex > -1) {
       const prevIndex = audioState.currentMoveIndex - 1;
       
-      // Reset to the proper position
       chessService.loadStudy(currentStudy, prevIndex);
       setPosition(chessService.getFen());
       
@@ -95,22 +83,17 @@ const ChessStudyPlayer: React.FC = () => {
       }));
       
       if (prevIndex >= 0) {
-        // Speak the previous commentary
         speechService.speak(`${currentStudy.moves[prevIndex].notation}. ${currentStudy.moves[prevIndex].commentary}`);
       } else {
-        // Starting position
         speechService.speak("Starting position.");
       }
     }
   }, [audioState.currentMoveIndex, currentStudy]);
 
-  // Handle play
   const handlePlay = useCallback(() => {
     if (!audioState.isPlaying) {
-      // If at the starting position or end of study
       if (audioState.currentMoveIndex === -1 || 
           audioState.currentMoveIndex >= currentStudy.moves.length - 1) {
-        // For the starting position, go to the first move
         if (audioState.currentMoveIndex === -1) {
           goToNextMove();
         }
@@ -130,7 +113,6 @@ const ChessStudyPlayer: React.FC = () => {
     }
   }, [audioState, currentStudy.moves, goToNextMove, toast]);
 
-  // Handle pause
   const handlePause = useCallback(() => {
     speechService.pause();
     setAudioState(prev => ({
@@ -144,14 +126,12 @@ const ChessStudyPlayer: React.FC = () => {
     });
   }, [toast]);
 
-  // Handle volume change
   const handleVolumeChange = useCallback((values: number[]) => {
     const newVolume = values[0];
     setVolume(newVolume);
     speechService.setVolume(newVolume);
   }, []);
 
-  // Auto-play next move when current one finishes
   useEffect(() => {
     if (audioState.isPlaying) {
       const onSpeechEnd = () => {
@@ -160,9 +140,8 @@ const ChessStudyPlayer: React.FC = () => {
             if (audioState.isPlaying) {
               goToNextMove();
             }
-          }, 1000); // Small pause between moves
+          }, 1000);
         } else {
-          // End of study
           setAudioState(prev => ({
             ...prev,
             isPlaying: false,
@@ -170,7 +149,6 @@ const ChessStudyPlayer: React.FC = () => {
         }
       };
       
-      // Register the callback
       const utterance = new SpeechSynthesisUtterance();
       utterance.onend = onSpeechEnd;
       
@@ -180,7 +158,6 @@ const ChessStudyPlayer: React.FC = () => {
     }
   }, [audioState.isPlaying, audioState.currentMoveIndex, currentStudy.moves.length, goToNextMove]);
 
-  // Clean up on unmount
   useEffect(() => {
     return () => {
       speechService.stop();
