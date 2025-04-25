@@ -1,7 +1,9 @@
 
 import React from "react";
+import { Link } from "react-router-dom";
 import ChessStudyPlayer from "@/components/ChessStudyPlayer";
 import { BookHeadphones } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   return (
@@ -12,9 +14,12 @@ const Index = () => {
             <BookHeadphones className="h-8 w-8 text-chess-dark" />
             <h1 className="text-3xl md:text-4xl font-bold text-chess-dark">Chess Audio Guide</h1>
           </div>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-4">
             Learn chess openings and strategies with audio narration. Your chess studies as an audiobook experience.
           </p>
+          <Link to="/record">
+            <Button variant="outline">Record a Match</Button>
+          </Link>
         </header>
         
         <main className="bg-white p-6 rounded-lg shadow-lg">

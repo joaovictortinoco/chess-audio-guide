@@ -1,4 +1,3 @@
-
 export interface ChessMove {
   move: string;
   notation: string;
@@ -16,4 +15,15 @@ export interface ChessStudy {
 export interface AudioState {
   isPlaying: boolean;
   currentMoveIndex: number;
+}
+
+export interface ChessMatch {
+  id: string;
+  date: string;
+  moves: Array<{
+    moveNumber: number;
+    notation: string;
+    comment?: string;
+  }>;
+  result?: string;
 }
