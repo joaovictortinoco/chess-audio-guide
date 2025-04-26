@@ -26,9 +26,17 @@ const ChessStudyPlayer: React.FC = () => {
     ? currentStudy.moves[audioState.currentMoveIndex] 
     : null;
 
+  // Initialize the board when the component mounts
+  useEffect(() => {
+    console.log('Initializing board with study:', currentStudy);
+    const newPosition = chessService.loadStudy(currentStudy);
+    setPosition(newPosition);
+  }, []);
+
   useEffect(() => {
     const study = sampleStudies.find((s) => s.id === selectedStudyId);
     if (study) {
+      console.log('Loading study:', study);
       setCurrentStudy(study);
       const newPosition = chessService.loadStudy(study);
       setPosition(newPosition);
@@ -40,6 +48,7 @@ const ChessStudyPlayer: React.FC = () => {
   }, [selectedStudyId]);
 
   const handleStudyChange = (studyId: string) => {
+    console.log('Changing study to:', studyId);
     speechService.stop();
     setSelectedStudyId(studyId);
   };
@@ -49,15 +58,25 @@ const ChessStudyPlayer: React.FC = () => {
       const nextIndex = audioState.currentMoveIndex + 1;
       const nextMove = currentStudy.moves[nextIndex];
       
-      chessService.makeMove(nextMove.move);
-      setPosition(chessService.getFen());
-      
-      setAudioState(prev => ({
-        ...prev,
-        currentMoveIndex: nextIndex,
-      }));
-      
-      speechService.speak(`${nextMove.notation}. ${nextMove.commentary}`);
+      console.log('Making move:', nextMove);
+      const success = chessService.makeMove(nextMove.move);
+      if (success) {
+        setPosition(chessService.getFen());
+        
+        setAudioState(prev => ({
+          ...prev,
+          currentMoveIndex: nextIndex,
+        }));
+        
+        speechService.speak(nextMove.commentary);
+      } else {
+        console.error('Failed to make move:', nextMove);
+        toast({
+          title: "Invalid Move",
+          description: `Could not make move: ${nextMove.notation}`,
+          variant: "destructive"
+        });
+      }
     } else {
       speechService.speak("End of study.");
       setAudioState(prev => ({
@@ -65,7 +84,7 @@ const ChessStudyPlayer: React.FC = () => {
         isPlaying: false,
       }));
     }
-  }, [audioState.currentMoveIndex, currentStudy.moves]);
+  }, [audioState.currentMoveIndex, currentStudy.moves, toast]);
 
   const goToPreviousMove = useCallback(() => {
     speechService.stop();
@@ -73,6 +92,7 @@ const ChessStudyPlayer: React.FC = () => {
     if (audioState.currentMoveIndex > -1) {
       const prevIndex = audioState.currentMoveIndex - 1;
       
+      console.log('Going back to move:', prevIndex);
       chessService.loadStudy(currentStudy, prevIndex);
       setPosition(chessService.getFen());
       
@@ -83,7 +103,7 @@ const ChessStudyPlayer: React.FC = () => {
       }));
       
       if (prevIndex >= 0) {
-        speechService.speak(`${currentStudy.moves[prevIndex].notation}. ${currentStudy.moves[prevIndex].commentary}`);
+        speechService.speak(currentStudy.moves[prevIndex].commentary);
       } else {
         speechService.speak("Starting position.");
       }

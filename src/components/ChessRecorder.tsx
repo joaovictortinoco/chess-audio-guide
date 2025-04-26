@@ -10,15 +10,15 @@ import AudioControls from "./AudioControls";
 import { Upload, Play, Pause } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "./ui/alert";
 interface ChessJsonMove {
-  jogada: string;
-  comentario: string;
+  move: string;
+  commentary: string;
   conceitos?: string[];
   referencias?: string[];
 }
 const ChessRecorder: React.FC = () => {
   const [position, setPosition] = useState<string>("start");
   const [currentMove, setCurrentMove] = useState("");
-  const [comment, setComment] = useState("");
+  const [commentary, setcommentary] = useState("");
   const [match, setMatch] = useState<ChessMatch>({
     id: Date.now().toString(),
     date: new Date().toISOString(),
@@ -81,9 +81,10 @@ const ChessRecorder: React.FC = () => {
   const simulateMove = (moveIndex: number) => {
     if (moveIndex < 0 || moveIndex >= jsonMoves.length) return;
     const moveData = jsonMoves[moveIndex];
+    if (!moveData || !moveData.move) return;
 
     // Extract individual moves from algebraic notation (like "1. e4 e5")
-    const moveParts = moveData.jogada.replace(/\d+\.\s+/, '').split(' ');
+    const moveParts = moveData.move.replace(/\d+\.\s+/, '').split(' ');
     let moveSuccess = false;
     for (const move of moveParts) {
       if (move && move.trim()) {
@@ -103,19 +104,19 @@ const ChessRecorder: React.FC = () => {
       setPosition(newPosition);
 
       // Extract move number from the notation
-      const moveNumberMatch = moveData.jogada.match(/^(\d+)\./);
+      const moveNumberMatch = moveData.move.match(/^(\d+)\./);
       const moveNumber = moveNumberMatch ? parseInt(moveNumberMatch[1]) : match.moves.length + 1;
       setMatch(prev => ({
         ...prev,
         moves: [...prev.moves, {
           moveNumber: moveNumber,
-          notation: moveData.jogada,
-          comment: moveData.comentario
+          notation: moveData.move,
+          commentary: moveData.commentary
         }]
       }));
 
-      // Speak the move and comment
-      const textToSpeak = `${moveData.jogada}. ${moveData.comentario}`;
+      // Speak the move and commentary
+      const textToSpeak = `${moveData.commentary}`;
       speechService.speak(textToSpeak);
 
       // Update current move index
@@ -145,7 +146,7 @@ const ChessRecorder: React.FC = () => {
       const newIndex = currentMoveIndex - 1;
       for (let i = 0; i <= newIndex; i++) {
         const moveData = jsonMoves[i];
-        const moveParts = moveData.jogada.replace(/\d+\.\s+/, '').split(' ');
+        const moveParts = moveData.move.replace(/\d+\.\s+/, '').split(' ');
         for (const move of moveParts) {
           if (move && move.trim()) {
             chessService.makeMove(move.trim());
@@ -159,12 +160,12 @@ const ChessRecorder: React.FC = () => {
       const updatedMoves = [];
       for (let i = 0; i <= newIndex; i++) {
         const moveData = jsonMoves[i];
-        const moveNumberMatch = moveData.jogada.match(/^(\d+)\./);
+        const moveNumberMatch = moveData.move.match(/^(\d+)\./);
         const moveNumber = moveNumberMatch ? parseInt(moveNumberMatch[1]) : i + 1;
         updatedMoves.push({
           moveNumber: moveNumber,
-          notation: moveData.jogada,
-          comment: moveData.comentario
+          notation: moveData.move,
+          commentary: moveData.commentary
         });
       }
       setMatch(prev => ({
@@ -202,11 +203,11 @@ const ChessRecorder: React.FC = () => {
         moves: [...prev.moves, {
           moveNumber: prev.moves.length + 1,
           notation: currentMove,
-          comment: comment.trim() || undefined
+          commentary: commentary.trim() || undefined
         }]
       }));
       setCurrentMove("");
-      setComment("");
+      setcommentary("");
       toast({
         title: "Move Recorded",
         description: `Move ${currentMove} has been recorded`
@@ -228,7 +229,7 @@ const ChessRecorder: React.FC = () => {
       moves: []
     });
     setCurrentMove("");
-    setComment("");
+    setcommentary("");
     setCurrentMoveIndex(-1);
     setIsPlaying(false);
     speechService.stop();
@@ -283,7 +284,7 @@ const ChessRecorder: React.FC = () => {
                   {move.moveNumber % 2 === 1 ? ' ' : '... '}
                   {move.notation}
                 </div>
-                {move.comment && <div className="text-sm text-gray-600 mt-1">{move.comment}</div>}
+                {move.commentary && <div className="text-sm text-gray-600 mt-1">{move.commentary}</div>}
               </div>)}
           </div>
         </div>

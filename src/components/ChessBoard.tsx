@@ -8,7 +8,7 @@ interface ChessBoardProps {
   boardWidth?: number;
 }
 
-const ChessBoard: React.FC<ChessBoardProps> = ({ position, boardWidth = 400 }) => {
+const ChessBoard: React.FC<ChessBoardProps> = ({ position }) => {
   // For customization of board colors
   const customBoardStyle = {
     borderRadius: "4px",
@@ -16,17 +16,23 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ position, boardWidth = 400 }) =
   };
 
   return (
-    <div className="chess-board-container">
-      <Chessboard
-        id="chessboard"
-        position={position}
-        boardWidth={boardWidth}
-        customBoardStyle={customBoardStyle}
-        customDarkSquareStyle={{ backgroundColor: "#215586" }} // Dark blue squares
-        customLightSquareStyle={{ backgroundColor: "#f0d9b5" }} // Light tan squares
-      />
+    <div className="chess-board-wrapper" style={{ width: "100%", maxWidth: "100vw" }}>
+      <div className="chess-board-container" style={{ width: "100%", position: "relative" }}>
+        <Chessboard
+          id="chessboard"
+          position={position}
+          boardWidth={Math.min(window.innerWidth, 600)}
+          customBoardStyle={customBoardStyle}
+          customDarkSquareStyle={{ backgroundColor: "#215586" }}
+          customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
+        />
+      </div>
+      <div className="chess-board-content" style={{ marginTop: "20px" }}>
+        {/* Add your content here */}
+        <p>Conteúdo adicional abaixo do tabuleiro.</p>
+      </div>
     </div>
   );
-};
+}
 
 export default ChessBoard;
